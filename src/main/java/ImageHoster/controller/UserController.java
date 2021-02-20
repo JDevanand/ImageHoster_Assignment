@@ -67,7 +67,7 @@ public class UserController {
             userService.registerUser(user);
             return "users/login";
         } else {
-            String error = "Password must contain atleast 1 Alphabet, 1 number & 1 special character";
+            String error = "Password must contain atleast 1 alphabet, 1 number & 1 special character";
             User user1 = new User();
             UserProfile profile1 = new UserProfile();
             user1.setProfile(profile1);
