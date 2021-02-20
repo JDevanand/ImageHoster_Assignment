@@ -86,19 +86,30 @@ public class ImageController {
     }
 
     //This controller method is called when the request pattern is of type 'editImage'
-    //This method fetches the image with the corresponding id from the database and adds it to the model with the key as 'image'
+    // The logic allows only owner of the image who uploaded it to edit the image
+    //For owners, This method fetches the image with the corresponding id from the database and adds it to the model with the key as 'image'
     //The method then returns 'images/edit.html' file wherein you fill all the updated details of the image
-
     //The method first needs to convert the list of all the tags to a string containing all the tags separated by a comma and then add this string in a Model type object
     //This string is then displayed by 'edit.html' file as previous tags of an image
-    @RequestMapping(value = "/editImage")
-    public String editImage(@RequestParam("imageId") Integer imageId, Model model) {
-        Image image = imageService.getImage(imageId);
 
-        String tags = convertTagsToString(image.getTags());
-        model.addAttribute("image", image);
-        model.addAttribute("tags", tags);
-        return "images/edit";
+    //For non owner, it returns html "images/image" and displays error message
+
+    @RequestMapping(value = "/editImage")
+    public String editImage(@RequestParam("imageId") Integer imageId, Model model, HttpSession session) {
+        User currentUser = (User) session.getAttribute("loggeduser");
+        Image image = imageService.getImage(imageId);
+        if((currentUser.getUsername()).equals(image.getUser().getUsername())) {
+            String tags = convertTagsToString(image.getTags());
+            model.addAttribute("image", image);
+            model.addAttribute("tags", tags);
+            return "images/edit";
+        }else {
+            String error = "Only the owner of the image can edit the image";
+            model.addAttribute("editError", error);
+            model.addAttribute("image", image);
+            model.addAttribute("tags", image.getTags());
+            return "images/image";
+        }
     }
 
     //This controller method is called when the request pattern is of type 'images/edit' and also the incoming request is of PUT type
@@ -137,12 +148,24 @@ public class ImageController {
 
 
     //This controller method is called when the request pattern is of type 'deleteImage' and also the incoming request is of DELETE type
-    //The method calls the deleteImage() method in the business logic passing the id of the image to be deleted
+    // The logic allows only owner of the image who uploaded it to delete the image
+    //For owners, The method calls the deleteImage() method in the business logic passing the id of the image to be deleted
     //Looks for a controller method with request mapping of type '/images'
+    //For non owner, it returns html "images/image" and displays error message
     @RequestMapping(value = "/deleteImage", method = RequestMethod.DELETE)
-    public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId) {
-        imageService.deleteImage(imageId);
-        return "redirect:/images";
+    public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId, HttpSession session, Model model) {
+        User currentUser = (User) session.getAttribute("loggeduser");
+        Image image = imageService.getImage(imageId);
+        if ((currentUser.getUsername()).equals(image.getUser().getUsername())) {
+            imageService.deleteImage(imageId);
+            return "redirect:/images";
+        }else {
+            String error = "Only the owner of the image can delete the image";
+            model.addAttribute("deleteError", error);
+            model.addAttribute("image", image);
+            model.addAttribute("tags", image.getTags());
+            return "images/image";
+        }
     }
 
 
