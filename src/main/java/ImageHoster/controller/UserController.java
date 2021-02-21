@@ -75,7 +75,6 @@ public class UserController {
             model.addAttribute("passwordTypeError", error);
             return "users/registration";
         }
-
     }
 
     //This controller method is called when the request pattern is of type 'users/login'
@@ -107,9 +106,9 @@ public class UserController {
     @RequestMapping(value = "users/logout", method = RequestMethod.POST)
     public String logout(Model model, HttpSession session) {
         session.invalidate();
-
         List<Image> images = imageService.getAllImages();
         model.addAttribute("images", images);
         return "index";
     }
+
 }

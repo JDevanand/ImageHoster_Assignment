@@ -23,6 +23,7 @@ public class CommentController {
     @Autowired
     private ImageService imageService;
 
+    //This method displays the comments that are available for the image
     @RequestMapping(value = "/image/{id}/{title}/comments", method = RequestMethod.POST)
     public String addNewComment(@PathVariable("id") Integer imageId,@RequestParam(value = "comment") String text, HttpSession session) {
 
@@ -34,9 +35,7 @@ public class CommentController {
         newComment.setImage(image);
         newComment.setText(text);
         newComment.setCreatedDate(new Date());
-
         commentService.addNewComment(newComment);
-
         return "redirect:/images/"+image.getId()+"/"+ image.getTitle();
     }
 

@@ -29,11 +29,19 @@ public class Comment {
     @Column(name = "date")
     private Date createdDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    //The 'comment' table is mapped to 'images' table with Many:One mapping
+    //One comment can belong to only one image but one image can have multiple comments
+    //FetchType is EAGER
+    @ManyToOne(fetch = FetchType.EAGER)
+    //Below annotation indicates that the name of the column in 'comment' table referring the primary key in 'images' table will be 'image_id'
     @JoinColumn(name = "image_id")
     private Image image;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    //The 'comment' table is mapped to 'users' table with Many:One mapping
+    //One comment can have only one user but one user can have multiple comments
+    //FetchType is EAGER
+    @ManyToOne(fetch = FetchType.EAGER)
+    //Below annotation indicates that the name of the column in 'comment' table referring the primary key in 'users' table will be 'user_id'
     @JoinColumn(name = "user_id")
     private User user;
 

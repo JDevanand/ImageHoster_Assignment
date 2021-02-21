@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.*;
 import java.util.List;
 
+//The annotation is a special type of @Component annotation which describes that the class defines a data repository
 @Repository
 public class CommentRepository {
 
@@ -14,19 +15,24 @@ public class CommentRepository {
     @PersistenceUnit(unitName = "imageHoster")
     private EntityManagerFactory emf;
 
+    //The method creates an instance of EntityManager
+    //Executes JPQL query to fetch all the commnets for the imageId from the database
+    //Returns the list of all the comments fetched from the database
     public List<Comment> getComments(Integer imageId) {
         EntityManager em = emf.createEntityManager();
         TypedQuery<Comment> typedQuery = em.createQuery("SELECT c from Comment c where c.image.id =:imageId", Comment.class).setParameter("imageId", imageId);
         List<Comment> resultList = typedQuery.getResultList();
-
         return resultList;
     }
 
+    //The method receives the comment object to be persisted in the database
+    //Creates an instance of EntityManager
+    //Starts a transaction
+    //The transaction is committed if it is successful
+    //The transaction is rolled back in case of unsuccessful transaction
     public void addComment(Comment comment) {
-
         EntityManager em = emf.createEntityManager();
         EntityTransaction transaction = em.getTransaction();
-
         try {
             transaction.begin();
             em.persist(comment);

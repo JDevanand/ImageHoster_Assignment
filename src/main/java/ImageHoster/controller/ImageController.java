@@ -40,16 +40,15 @@ public class ImageController {
         return "images";
     }
 
-    //This method is called when the details of the specific image with corresponding title are to be displayed
-    //The logic is to get the image from the databse with corresponding title. After getting the image from the database the details are shown
-    //First receive the dynamic parameter in the incoming request URL in a string variable 'title' and also the Model type object
-    //Call the getImageByTitle() method in the business logic to fetch all the details of that image
+    //This method is called when the details of the specific image with corresponding id are to be displayed
+    //The logic is to get the image from the databse with corresponding id. After getting the image from the database the details are shown
+    //First receive the dynamic parameter in the incoming request URL in a string variable 'id' and also the Model type object
+    //Call the getImage() method in the business logic to fetch all the details of that image
     //Add the image in the Model type object with 'image' as the key
     //Return 'images/image.html' file
-
-    //Also now you need to add the tags of an image in the Model type object
-    //Here a list of tags is added in the Model type object
-    //this list is then sent to 'images/image.html' file and the tags are displayed
+    //Also now you need to add the tags & comments of an image in the Model type object
+    //Here a list of tags & comments are added to the Model type object
+    //these lists are then sent to 'images/image.html' file and the tags are displayed
     @RequestMapping("/images/{id}/{title}")
     public String showImage(@PathVariable("id") Integer id, Model model) {
         Image image = imageService.getImage(id);
@@ -73,7 +72,6 @@ public class ImageController {
     //Convert the image to Base64 format and store it as a string in the 'imageFile' attribute
     //Set the date on which the image is posted
     //After storing the image, this method directs to the logged in user homepage displaying all the images
-
     //Get the 'tags' request parameter using @RequestParam annotation which is just a string of all the tags
     //Store all the tags in the database and make a list of all the tags using the findOrCreateTags() method
     //set the tags attribute of the image as a list of all the tags returned by the findOrCreateTags() method
@@ -98,9 +96,7 @@ public class ImageController {
     //The method then returns 'images/edit.html' file wherein you fill all the updated details of the image
     //The method first needs to convert the list of all the tags to a string containing all the tags separated by a comma and then add this string in a Model type object
     //This string is then displayed by 'edit.html' file as previous tags of an image
-
-    //For non owner, it returns html "images/image" and displays error message
-
+    //For non-owner, it returns html "images/image" and displays editError message
     @RequestMapping(value = "/editImage")
     public String editImage(@RequestParam("imageId") Integer imageId, Model model, HttpSession session) {
         User currentUser = (User) session.getAttribute("loggeduser");
@@ -127,16 +123,13 @@ public class ImageController {
     //Set the date on which the image is posted
     //Call the updateImage() method in the business logic to update the image
     //Direct to the same page showing the details of that particular updated image
-
     //The method also receives tags parameter which is a string of all the tags separated by a comma using the annotation @RequestParam
     //The method converts the string to a list of all the tags using findOrCreateTags() method and sets the tags attribute of an image as a list of all the tags
     @RequestMapping(value = "/editImage", method = RequestMethod.PUT)
     public String editImageSubmit(@RequestParam("file") MultipartFile file, @RequestParam("imageId") Integer imageId, @RequestParam("tags") String tags, Image updatedImage, HttpSession session) throws IOException {
-
         Image image = imageService.getImage(imageId);
         String updatedImageData = convertUploadedFileToBase64(file);
         List<Tag> imageTags = findOrCreateTags(tags);
-
         if (updatedImageData.isEmpty())
             updatedImage.setImageFile(image.getImageFile());
         else {
@@ -148,7 +141,6 @@ public class ImageController {
         updatedImage.setUser(user);
         updatedImage.setTags(imageTags);
         updatedImage.setDate(new Date());
-
         imageService.updateImage(updatedImage);
         return "redirect:/images/" +updatedImage.getId()+"/"+ updatedImage.getTitle();
     }
@@ -158,7 +150,7 @@ public class ImageController {
     // The logic allows only owner of the image who uploaded it to delete the image
     //For owners, The method calls the deleteImage() method in the business logic passing the id of the image to be deleted
     //Looks for a controller method with request mapping of type '/images'
-    //For non owner, it returns html "images/image" and displays error message
+    //For non-owner, it returns html "images/image" and displays deleteError message
     @RequestMapping(value = "/deleteImage", method = RequestMethod.DELETE)
     public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId, HttpSession session, Model model) {
         User currentUser = (User) session.getAttribute("loggeduser");
@@ -175,7 +167,6 @@ public class ImageController {
         }
     }
 
-
     //This method converts the image to Base64 format
     private String convertUploadedFileToBase64(MultipartFile file) throws IOException {
         return Base64.getEncoder().encodeToString(file.getBytes());
@@ -187,11 +178,9 @@ public class ImageController {
     private List<Tag> findOrCreateTags(String tagNames) {
         StringTokenizer st = new StringTokenizer(tagNames, ",");
         List<Tag> tags = new ArrayList<Tag>();
-
         while (st.hasMoreTokens()) {
             String tagName = st.nextToken().trim();
             Tag tag = tagService.getTagByName(tagName);
-
             if (tag == null) {
                 Tag newTag = new Tag(tagName);
                 tag = tagService.createTag(newTag);
@@ -201,20 +190,17 @@ public class ImageController {
         return tags;
     }
 
-
     //The method receives the list of all tags
     //Converts the list of all tags to a single string containing all the tags separated by a comma
     //Returns the string
     private String convertTagsToString(List<Tag> tags) {
         StringBuilder tagString = new StringBuilder();
-
         for (int i = 0; i <= tags.size() - 2; i++) {
             tagString.append(tags.get(i).getName()).append(",");
         }
-
         Tag lastTag = tags.get(tags.size() - 1);
         tagString.append(lastTag.getName());
-
         return tagString.toString();
     }
+
 }
